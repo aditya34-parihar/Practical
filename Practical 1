@@ -1,0 +1,56 @@
+-- Drop the table if it already exists
+DROP TABLE IF EXISTS FeePayments;
+
+-- Create the FeePayments table
+CREATE TABLE FeePayments (
+    payment_id INT PRIMARY KEY,
+    student_name VARCHAR(100) NOT NULL,
+    amount DECIMAL(10,2) CHECK (amount > 0),
+    payment_date DATE NOT NULL
+);
+
+-- First transaction (valid entries)
+START TRANSACTION;
+INSERT INTO FeePayments VALUES (1, 'Ashish', 5000.00, '2024-06-01');
+INSERT INTO FeePayments VALUES (2, 'Smaran', 4500.00, '2024-06-02');
+INSERT INTO FeePayments VALUES (3, 'Vaibhav', 5500.00, '2024-06-03');
+COMMIT;
+
+-- View data after first commit
+SELECT * FROM FeePayments;
+
+-- Second transaction (one valid, one invalid due to duplicate ID and negative amount)
+START TRANSACTION;
+-- Valid
+INSERT INTO FeePayments VALUES (4, 'Kiran', 4800.00, '2024-06-04');
+-- Invalid: duplicate ID (1) and negative amount
+-- This will cause a failure, so we ROLLBACK
+-- Uncomment if you want to see the error: 
+-- INSERT INTO FeePayments VALUES (1, 'Ashish', -3000.00, '2024-06-05');
+ROLLBACK;
+
+-- View data after rollback (no changes expected)
+SELECT * FROM FeePayments;
+
+-- Third transaction (one valid, one invalid due to NULL student_name)
+START TRANSACTION;
+INSERT INTO FeePayments VALUES (5, 'Meena', 4900.00, '2024-06-06');
+-- Invalid due to NULL student_name
+-- Uncomment if you want to see the error:
+-- INSERT INTO FeePayments VALUES (6, NULL, 4600.00, '2024-06-07');
+ROLLBACK;
+
+-- View data after rollback (no changes expected)
+SELECT * FROM FeePayments;
+
+-- Fourth transaction (valid entries)
+START TRANSACTION;
+INSERT INTO FeePayments VALUES (7, 'Sneha', 4700.00, '2024-06-08');
+INSERT INTO FeePayments VALUES (8, 'Arjun', 4900.00, '2024-06-09');
+COMMIT;
+
+-- Final table state
+SELECT * FROM FeePayments;
+
+-- This table does not exist; handle carefully or remove this line
+-- SELECT * FROM departments;
